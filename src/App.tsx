@@ -12,6 +12,7 @@ import Reviews from "./pages/Reviews";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import { RegistrationFlow } from "./components/registration/RegistrationFlow";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/register" element={<RegistrationFlow />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/leads" element={<Leads />} />
           <Route path="/analytics" element={<Analytics />} />
