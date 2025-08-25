@@ -7,8 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Camera, Plus, User, MapPin, DollarSign, Calendar, Edit, Trash2, Play } from "lucide-react";
+import { Building2, Camera, Plus, User, MapPin, DollarSign, Calendar, Edit, Trash2, Play, Eye, Check } from "lucide-react";
 import { useState } from "react";
+import { ProfileTemplate1 } from "@/components/profile/ProfileTemplate1";
+import { ProfileTemplate2 } from "@/components/profile/ProfileTemplate2";
+import { ProfileTemplate3 } from "@/components/profile/ProfileTemplate3";
 
 interface Work {
   id: string;
@@ -25,6 +28,15 @@ interface Work {
 export default function Profile() {
   const [works, setWorks] = useState<Work[]>([]);
   const [isAddWorkOpen, setIsAddWorkOpen] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState<number>(1);
+  const [isTemplatePreviewOpen, setIsTemplatePreviewOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<number>(1);
+  const [profileData, setProfileData] = useState({
+    companyName: 'Sample Company',
+    phone: '(555) 123-4567',
+    address: '123 Business St, City, State 12345',
+    about: 'We are a leading company providing excellent services to our clients with over 10 years of experience in the industry.'
+  });
   const [newWork, setNewWork] = useState<Omit<Work, 'id'>>({
     title: '',
     description: '',
@@ -59,6 +71,30 @@ export default function Profile() {
     setWorks(works.filter(work => work.id !== id));
   };
 
+  const handlePreviewTemplate = (templateNumber: number) => {
+    setPreviewTemplate(templateNumber);
+    setIsTemplatePreviewOpen(true);
+  };
+
+  const handleActivateTemplate = (templateNumber: number) => {
+    setActiveTemplate(templateNumber);
+    setIsTemplatePreviewOpen(false);
+  };
+
+  const getTemplateComponent = (templateNumber: number) => {
+    const data = { ...profileData, works };
+    switch (templateNumber) {
+      case 1:
+        return <ProfileTemplate1 data={data} />;
+      case 2:
+        return <ProfileTemplate2 data={data} />;
+      case 3:
+        return <ProfileTemplate3 data={data} />;
+      default:
+        return <ProfileTemplate1 data={data} />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="flex">
@@ -83,10 +119,11 @@ export default function Profile() {
 
           <main className="p-4 sm:p-6">
             <Tabs defaultValue="company" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
                 <TabsTrigger value="company" className="text-xs sm:text-sm">Company Info</TabsTrigger>
                 <TabsTrigger value="services" className="text-xs sm:text-sm">Services</TabsTrigger>
                 <TabsTrigger value="portfolio" className="text-xs sm:text-sm">Portfolio</TabsTrigger>
+                <TabsTrigger value="templates" className="text-xs sm:text-sm">Templates</TabsTrigger>
                 <TabsTrigger value="team" className="text-xs sm:text-sm">Team</TabsTrigger>
               </TabsList>
 
@@ -105,16 +142,31 @@ export default function Profile() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="company-name">Company Name</Label>
-                        <Input id="company-name" placeholder="Enter company name" />
+                        <Input 
+                          id="company-name" 
+                          placeholder="Enter company name"
+                          value={profileData.companyName}
+                          onChange={(e) => setProfileData({...profileData, companyName: e.target.value})}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="phone">Phone Number</Label>
-                        <Input id="phone" placeholder="(555) 123-4567" />
+                        <Input 
+                          id="phone" 
+                          placeholder="(555) 123-4567"
+                          value={profileData.phone}
+                          onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="address">Address</Label>
-                      <Input id="address" placeholder="Enter business address" />
+                      <Input 
+                        id="address" 
+                        placeholder="Enter business address"
+                        value={profileData.address}
+                        onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="about">About Us</Label>
@@ -122,6 +174,8 @@ export default function Profile() {
                         id="about" 
                         placeholder="Describe your business..." 
                         className="min-h-[120px]"
+                        value={profileData.about}
+                        onChange={(e) => setProfileData({...profileData, about: e.target.value})}
                       />
                     </div>
                   </CardContent>
@@ -336,6 +390,79 @@ export default function Profile() {
                 </Card>
               </TabsContent>
 
+              <TabsContent value="templates">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg sm:text-xl">Profile Templates</CardTitle>
+                    <CardDescription>
+                      Choose how your profile will be displayed to end users. Preview and activate your preferred template.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {[1, 2, 3].map((templateNumber) => (
+                        <Card key={templateNumber} className={`relative overflow-hidden transition-all ${
+                          activeTemplate === templateNumber ? 'ring-2 ring-primary' : 'hover:shadow-lg'
+                        }`}>
+                          <div className="aspect-video bg-gradient-to-br from-muted to-muted/50 relative group cursor-pointer"
+                               onClick={() => handlePreviewTemplate(templateNumber)}>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="text-center">
+                                <Eye className="w-8 h-8 mx-auto mb-2 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                                  Template {templateNumber}
+                                </p>
+                              </div>
+                            </div>
+                            {activeTemplate === templateNumber && (
+                              <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
+                                <Check className="w-4 h-4" />
+                              </div>
+                            )}
+                          </div>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h3 className="font-semibold text-sm">
+                                  {templateNumber === 1 ? 'Classic' : templateNumber === 2 ? 'Modern' : 'Premium'} Template
+                                </h3>
+                                <p className="text-xs text-muted-foreground">
+                                  {templateNumber === 1 ? 'Clean and professional' : 
+                                   templateNumber === 2 ? 'Sidebar layout design' : 
+                                   'Hero section with gradient'}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline" onClick={() => handlePreviewTemplate(templateNumber)}>
+                                  <Eye className="w-3 h-3" />
+                                </Button>
+                                {activeTemplate !== templateNumber && (
+                                  <Button size="sm" onClick={() => handleActivateTemplate(templateNumber)}>
+                                    Activate
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                    
+                    <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        <span className="font-medium text-sm">Currently Active: 
+                          {activeTemplate === 1 ? ' Classic' : activeTemplate === 2 ? ' Modern' : ' Premium'} Template
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        This template is currently being used to display your profile to end users.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
               <TabsContent value="team">
                 <Card>
                   <CardHeader>
@@ -361,6 +488,37 @@ export default function Profile() {
           </main>
         </div>
       </div>
+
+      {/* Template Preview Dialog */}
+      <Dialog open={isTemplatePreviewOpen} onOpenChange={setIsTemplatePreviewOpen}>
+        <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto p-0">
+          <DialogHeader className="p-6 pb-0">
+            <div className="flex items-center justify-between">
+              <DialogTitle>
+                Template {previewTemplate} Preview - {
+                  previewTemplate === 1 ? 'Classic' : 
+                  previewTemplate === 2 ? 'Modern' : 
+                  'Premium'
+                }
+              </DialogTitle>
+              <div className="flex gap-2">
+                {activeTemplate !== previewTemplate && (
+                  <Button onClick={() => handleActivateTemplate(previewTemplate)}>
+                    <Check className="w-4 h-4 mr-2" />
+                    Activate This Template
+                  </Button>
+                )}
+                <Button variant="outline" onClick={() => setIsTemplatePreviewOpen(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+          <div className="bg-muted/20">
+            {getTemplateComponent(previewTemplate)}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
