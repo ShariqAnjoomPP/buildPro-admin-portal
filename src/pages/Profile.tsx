@@ -5,9 +5,60 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, Camera, Plus, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Building2, Camera, Plus, User, MapPin, DollarSign, Calendar, Edit, Trash2, Play } from "lucide-react";
+import { useState } from "react";
+
+interface Work {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  cost: string;
+  deadline: string;
+  images: string[];
+  videos: string[];
+  category: string;
+}
 
 export default function Profile() {
+  const [works, setWorks] = useState<Work[]>([]);
+  const [isAddWorkOpen, setIsAddWorkOpen] = useState(false);
+  const [newWork, setNewWork] = useState<Omit<Work, 'id'>>({
+    title: '',
+    description: '',
+    location: '',
+    cost: '',
+    deadline: '',
+    images: [],
+    videos: [],
+    category: ''
+  });
+
+  const handleAddWork = () => {
+    const work: Work = {
+      ...newWork,
+      id: Date.now().toString()
+    };
+    setWorks([...works, work]);
+    setNewWork({
+      title: '',
+      description: '',
+      location: '',
+      cost: '',
+      deadline: '',
+      images: [],
+      videos: [],
+      category: ''
+    });
+    setIsAddWorkOpen(false);
+  };
+
+  const handleDeleteWork = (id: string) => {
+    setWorks(works.filter(work => work.id !== id));
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="flex">
@@ -15,31 +66,34 @@ export default function Profile() {
         
         <div className="flex-1 lg:ml-0">
           <header className="bg-card border-b border-border shadow-card">
-            <div className="flex items-center justify-between px-6 py-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-4 gap-4">
               <div>
-                <h1 className="text-2xl font-bold font-heading text-foreground">
+                <h1 className="text-xl sm:text-2xl font-bold font-heading text-foreground">
                   Profile Management
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   Manage your business profile and information
                 </p>
               </div>
+              <Button className="w-full sm:w-auto">
+                Save Changes
+              </Button>
             </div>
           </header>
 
-          <main className="p-6">
+          <main className="p-4 sm:p-6">
             <Tabs defaultValue="company" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="company">Company Info</TabsTrigger>
-                <TabsTrigger value="services">Services</TabsTrigger>
-                <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-                <TabsTrigger value="team">Team</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+                <TabsTrigger value="company" className="text-xs sm:text-sm">Company Info</TabsTrigger>
+                <TabsTrigger value="services" className="text-xs sm:text-sm">Services</TabsTrigger>
+                <TabsTrigger value="portfolio" className="text-xs sm:text-sm">Portfolio</TabsTrigger>
+                <TabsTrigger value="team" className="text-xs sm:text-sm">Team</TabsTrigger>
               </TabsList>
 
               <TabsContent value="company">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                       <Building2 className="w-5 h-5" />
                       Company Information
                     </CardTitle>
@@ -70,7 +124,6 @@ export default function Profile() {
                         className="min-h-[120px]"
                       />
                     </div>
-                    <Button>Save Changes</Button>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -78,14 +131,14 @@ export default function Profile() {
               <TabsContent value="services">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Services</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl">Services</CardTitle>
                     <CardDescription>
                       Manage the services your business offers
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <Button>
+                      <Button className="w-full sm:w-auto">
                         <Plus className="w-4 h-4 mr-2" />
                         Add Service
                       </Button>
@@ -99,25 +152,186 @@ export default function Profile() {
 
               <TabsContent value="portfolio">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Portfolio</CardTitle>
-                    <CardDescription>
-                      Showcase your work with photos and videos
-                    </CardDescription>
+                  <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
+                    <div>
+                      <CardTitle className="text-lg sm:text-xl">Portfolio & Works</CardTitle>
+                      <CardDescription>
+                        Showcase your completed projects with details
+                      </CardDescription>
+                    </div>
+                    <Dialog open={isAddWorkOpen} onOpenChange={setIsAddWorkOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full sm:w-auto">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Work
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Add New Work</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="work-title">Project Title</Label>
+                              <Input 
+                                id="work-title"
+                                placeholder="Enter project title"
+                                value={newWork.title}
+                                onChange={(e) => setNewWork({...newWork, title: e.target.value})}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="work-category">Category</Label>
+                              <Input 
+                                id="work-category"
+                                placeholder="e.g., Web Design, Photography"
+                                value={newWork.category}
+                                onChange={(e) => setNewWork({...newWork, category: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="work-description">Description</Label>
+                            <Textarea 
+                              id="work-description"
+                              placeholder="Describe the project details..."
+                              className="min-h-[100px]"
+                              value={newWork.description}
+                              onChange={(e) => setNewWork({...newWork, description: e.target.value})}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="work-location">Location</Label>
+                              <Input 
+                                id="work-location"
+                                placeholder="Project location"
+                                value={newWork.location}
+                                onChange={(e) => setNewWork({...newWork, location: e.target.value})}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="work-cost">Cost</Label>
+                              <Input 
+                                id="work-cost"
+                                placeholder="$0.00"
+                                value={newWork.cost}
+                                onChange={(e) => setNewWork({...newWork, cost: e.target.value})}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="work-deadline">Deadline</Label>
+                              <Input 
+                                id="work-deadline"
+                                type="date"
+                                value={newWork.deadline}
+                                onChange={(e) => setNewWork({...newWork, deadline: e.target.value})}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Media Upload</Label>
+                            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                              <Camera className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                              <p className="text-sm text-muted-foreground mb-2">
+                                Upload images and videos for this project
+                              </p>
+                              <Button variant="outline" size="sm">
+                                <Camera className="w-4 h-4 mr-2" />
+                                Choose Files
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row justify-end gap-2">
+                            <Button variant="outline" onClick={() => setIsAddWorkOpen(false)} className="w-full sm:w-auto">
+                              Cancel
+                            </Button>
+                            <Button onClick={handleAddWork} className="w-full sm:w-auto">
+                              Add Work
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <Button>
-                        <Camera className="w-4 h-4 mr-2" />
-                        Upload Media
-                      </Button>
+                    {works.length === 0 ? (
                       <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
                         <Camera className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                        <p className="text-muted-foreground">
-                          Drag and drop images here, or click "Upload Media" to add to your portfolio
+                        <p className="text-muted-foreground mb-4">
+                          No works added yet. Start building your portfolio by adding your first project.
                         </p>
+                        <Button onClick={() => setIsAddWorkOpen(true)}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Your First Work
+                        </Button>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {works.map((work) => (
+                          <Card key={work.id} className="overflow-hidden">
+                            <div className="aspect-video bg-muted relative group">
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <Camera className="w-8 h-8 text-muted-foreground" />
+                              </div>
+                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex gap-1">
+                                  <Button size="icon" variant="secondary" className="h-8 w-8">
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button 
+                                    size="icon" 
+                                    variant="destructive" 
+                                    className="h-8 w-8"
+                                    onClick={() => handleDeleteWork(work.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between mb-2">
+                                <h3 className="font-semibold text-sm sm:text-base truncate">{work.title}</h3>
+                                {work.category && (
+                                  <Badge variant="secondary" className="text-xs ml-2 flex-shrink-0">
+                                    {work.category}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                                {work.description}
+                              </p>
+                              <div className="space-y-2 text-xs">
+                                {work.location && (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <MapPin className="w-3 h-3 flex-shrink-0" />
+                                    <span className="truncate">{work.location}</span>
+                                  </div>
+                                )}
+                                {work.cost && (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <DollarSign className="w-3 h-3 flex-shrink-0" />
+                                    <span>{work.cost}</span>
+                                  </div>
+                                )}
+                                {work.deadline && (
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Calendar className="w-3 h-3 flex-shrink-0" />
+                                    <span>{new Date(work.deadline).toLocaleDateString()}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -125,14 +339,14 @@ export default function Profile() {
               <TabsContent value="team">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Team Members</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl">Team Members</CardTitle>
                     <CardDescription>
                       Manage your team members and their information
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <Button>
+                      <Button className="w-full sm:w-auto">
                         <User className="w-4 h-4 mr-2" />
                         Add Team Member
                       </Button>
