@@ -7,6 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 import { Building2, Camera, Plus, User, MapPin, DollarSign, Calendar, Edit, Trash2, Play, Eye, Check } from "lucide-react";
 import { useState } from "react";
 import { ProfileTemplate1 } from "@/components/profile/ProfileTemplate1";
@@ -25,9 +28,20 @@ interface Work {
   category: string;
 }
 
+interface Service {
+  id: string;
+  name: string;
+  description: string;
+  expertise: 'beginner' | 'intermediate' | 'expert';
+  isActive: boolean;
+}
+
 export default function Profile() {
+  const { toast } = useToast();
   const [works, setWorks] = useState<Work[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [isAddWorkOpen, setIsAddWorkOpen] = useState(false);
+  const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<number>(1);
   const [isTemplatePreviewOpen, setIsTemplatePreviewOpen] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<number>(1);
@@ -46,6 +60,13 @@ export default function Profile() {
     images: [],
     videos: [],
     category: ''
+  });
+
+  const [newService, setNewService] = useState<Omit<Service, 'id'>>({
+    name: '',
+    description: '',
+    expertise: 'beginner',
+    isActive: true
   });
 
   const handleAddWork = () => {
@@ -69,6 +90,57 @@ export default function Profile() {
 
   const handleDeleteWork = (id: string) => {
     setWorks(works.filter(work => work.id !== id));
+  };
+
+  const handleAddService = () => {
+    const service: Service = {
+      ...newService,
+      id: Date.now().toString()
+    };
+    setServices([...services, service]);
+    setNewService({
+      name: '',
+      description: '',
+      expertise: 'beginner',
+      isActive: true
+    });
+    setIsAddServiceOpen(false);
+    
+    toast({
+      title: "Service Added",
+      description: `${service.name} has been added to your profile.`
+    });
+  };
+
+  const handleDeleteService = (id: string) => {
+    setServices(services.filter(service => service.id !== id));
+    toast({
+      title: "Service Removed",
+      description: "Service has been removed from your profile."
+    });
+  };
+
+  const handleToggleService = (id: string, isActive: boolean) => {
+    setServices(services.map(service => 
+      service.id === id ? { ...service, isActive } : service
+    ));
+    
+    const serviceName = services.find(s => s.id === id)?.name || 'Service';
+    toast({
+      title: isActive ? "Service Activated" : "Service Deactivated",
+      description: isActive 
+        ? `${serviceName} is now visible to the public.`
+        : `${serviceName} is now hidden from public view.`
+    });
+  };
+
+  const getExpertiseColor = (expertise: string) => {
+    switch (expertise) {
+      case 'beginner': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
+      case 'intermediate': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300';
+      case 'expert': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
+    }
   };
 
   const handlePreviewTemplate = (templateNumber: number) => {
@@ -184,21 +256,140 @@ export default function Profile() {
 
               <TabsContent value="services">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg sm:text-xl">Services</CardTitle>
-                    <CardDescription>
-                      Manage the services your business offers
-                    </CardDescription>
+                  <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
+                    <div>
+                      <CardTitle className="text-lg sm:text-xl">Services</CardTitle>
+                      <CardDescription>
+                        Manage the services your business offers
+                      </CardDescription>
+                    </div>
+                    <Dialog open={isAddServiceOpen} onOpenChange={setIsAddServiceOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full sm:w-auto">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Service
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                          <DialogTitle>Add New Service</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="service-name">Service Name</Label>
+                            <Input 
+                              id="service-name"
+                              placeholder="e.g., Web Development, Photography"
+                              value={newService.name}
+                              onChange={(e) => setNewService({...newService, name: e.target.value})}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="service-description">Description</Label>
+                            <Textarea 
+                              id="service-description"
+                              placeholder="Describe what this service includes..."
+                              className="min-h-[100px]"
+                              value={newService.description}
+                              onChange={(e) => setNewService({...newService, description: e.target.value})}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="expertise-level">Expertise Level</Label>
+                            <Select value={newService.expertise} onValueChange={(value: 'beginner' | 'intermediate' | 'expert') => setNewService({...newService, expertise: value})}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select expertise level" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="beginner">Beginner</SelectItem>
+                                <SelectItem value="intermediate">Intermediate</SelectItem>
+                                <SelectItem value="expert">Expert</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                              <Label htmlFor="service-active">Active Service</Label>
+                              <p className="text-sm text-muted-foreground">
+                                When active, this service will be visible to the public
+                              </p>
+                            </div>
+                            <Switch 
+                              id="service-active"
+                              checked={newService.isActive}
+                              onCheckedChange={(checked) => setNewService({...newService, isActive: checked})}
+                            />
+                          </div>
+
+                          <div className="flex gap-2 pt-4">
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setIsAddServiceOpen(false)}
+                              className="flex-1"
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={handleAddService}
+                              disabled={!newService.name.trim()}
+                              className="flex-1"
+                            >
+                              Add Service
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <Button className="w-full sm:w-auto">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Service
-                      </Button>
-                      <div className="text-center py-8 text-muted-foreground">
-                        No services added yet. Click "Add Service" to get started.
-                      </div>
+                      {services.length > 0 ? (
+                        <div className="grid gap-4">
+                          {services.map((service) => (
+                            <div key={service.id} className="border rounded-lg p-4 space-y-3">
+                              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                                <div className="space-y-1 flex-1">
+                                  <h3 className="font-medium text-foreground">{service.name}</h3>
+                                  <p className="text-sm text-muted-foreground">{service.description}</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge className={getExpertiseColor(service.expertise)}>
+                                    {service.expertise.charAt(0).toUpperCase() + service.expertise.slice(1)}
+                                  </Badge>
+                                  <Button
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => handleDeleteService(service.id)}
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-between pt-2 border-t">
+                                <div className="flex items-center gap-2">
+                                  <Eye className={`w-4 h-4 ${service.isActive ? 'text-green-600' : 'text-gray-400'}`} />
+                                  <span className="text-sm font-medium">
+                                    {service.isActive ? 'Visible to Public' : 'Hidden from Public'}
+                                  </span>
+                                </div>
+                                <Switch 
+                                  checked={service.isActive}
+                                  onCheckedChange={(checked) => handleToggleService(service.id, checked)}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          No services added yet. Click "Add Service" to get started.
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
