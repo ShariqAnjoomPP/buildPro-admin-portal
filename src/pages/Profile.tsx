@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Camera, Plus, User, MapPin, DollarSign, Calendar, Edit, Trash2, Play, Eye, Check } from "lucide-react";
+import { Building2, Camera, Plus, User, MapPin, DollarSign, Calendar, Edit, Trash2, Play, Eye, Check, Users, Mail, Phone } from "lucide-react";
 import { useState } from "react";
 import { ProfileTemplate1 } from "@/components/profile/ProfileTemplate1";
 import { ProfileTemplate2 } from "@/components/profile/ProfileTemplate2";
@@ -36,12 +36,24 @@ interface Service {
   isActive: boolean;
 }
 
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  department: string;
+  isActive: boolean;
+}
+
 export default function Profile() {
   const { toast } = useToast();
   const [works, setWorks] = useState<Work[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isAddWorkOpen, setIsAddWorkOpen] = useState(false);
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
+  const [isAddTeamMemberOpen, setIsAddTeamMemberOpen] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<number>(1);
   const [isTemplatePreviewOpen, setIsTemplatePreviewOpen] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<number>(1);
@@ -66,6 +78,15 @@ export default function Profile() {
     name: '',
     description: '',
     expertise: 'beginner',
+    isActive: true
+  });
+
+  const [newTeamMember, setNewTeamMember] = useState<Omit<TeamMember, 'id'>>({
+    name: '',
+    role: '',
+    email: '',
+    phone: '',
+    department: '',
     isActive: true
   });
 
@@ -141,6 +162,51 @@ export default function Profile() {
       case 'expert': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
     }
+  };
+
+  const handleAddTeamMember = () => {
+    const teamMember: TeamMember = {
+      ...newTeamMember,
+      id: Date.now().toString()
+    };
+    setTeamMembers([...teamMembers, teamMember]);
+    setNewTeamMember({
+      name: '',
+      role: '',
+      email: '',
+      phone: '',
+      department: '',
+      isActive: true
+    });
+    setIsAddTeamMemberOpen(false);
+    
+    toast({
+      title: "Team Member Added",
+      description: `${teamMember.name} has been added to your team.`
+    });
+  };
+
+  const handleDeleteTeamMember = (id: string) => {
+    const member = teamMembers.find(m => m.id === id);
+    setTeamMembers(teamMembers.filter(member => member.id !== id));
+    toast({
+      title: "Team Member Removed",
+      description: `${member?.name || 'Team member'} has been removed from your team.`
+    });
+  };
+
+  const handleToggleTeamMember = (id: string, isActive: boolean) => {
+    setTeamMembers(teamMembers.map(member => 
+      member.id === id ? { ...member, isActive } : member
+    ));
+    
+    const memberName = teamMembers.find(m => m.id === id)?.name || 'Team member';
+    toast({
+      title: isActive ? "Team Member Activated" : "Team Member Deactivated",
+      description: isActive 
+        ? `${memberName} is now visible in your public team directory.`
+        : `${memberName} is now hidden from public view.`
+    });
   };
 
   const handlePreviewTemplate = (templateNumber: number) => {
@@ -656,21 +722,182 @@ export default function Profile() {
 
               <TabsContent value="team">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg sm:text-xl">Team Members</CardTitle>
-                    <CardDescription>
-                      Manage your team members and their information
-                    </CardDescription>
+                  <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                        <Users className="w-5 h-5" />
+                        Team Members
+                      </CardTitle>
+                      <CardDescription>
+                        Manage your team members and their public visibility
+                      </CardDescription>
+                    </div>
+                    <Dialog open={isAddTeamMemberOpen} onOpenChange={setIsAddTeamMemberOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full sm:w-auto">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Team Member
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                          <DialogTitle>Add New Team Member</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="member-name">Full Name</Label>
+                              <Input 
+                                id="member-name"
+                                placeholder="Enter full name"
+                                value={newTeamMember.name}
+                                onChange={(e) => setNewTeamMember({...newTeamMember, name: e.target.value})}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="member-role">Role/Position</Label>
+                              <Input 
+                                id="member-role"
+                                placeholder="e.g., Project Manager, Developer"
+                                value={newTeamMember.role}
+                                onChange={(e) => setNewTeamMember({...newTeamMember, role: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="member-email">Email Address</Label>
+                            <Input 
+                              id="member-email"
+                              type="email"
+                              placeholder="email@company.com"
+                              value={newTeamMember.email}
+                              onChange={(e) => setNewTeamMember({...newTeamMember, email: e.target.value})}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="member-phone">Phone Number</Label>
+                              <Input 
+                                id="member-phone"
+                                placeholder="(555) 123-4567"
+                                value={newTeamMember.phone}
+                                onChange={(e) => setNewTeamMember({...newTeamMember, phone: e.target.value})}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="member-department">Department</Label>
+                              <Input 
+                                id="member-department"
+                                placeholder="e.g., Development, Marketing"
+                                value={newTeamMember.department}
+                                onChange={(e) => setNewTeamMember({...newTeamMember, department: e.target.value})}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                              <Label htmlFor="member-active">Visible in Team Directory</Label>
+                              <p className="text-sm text-muted-foreground">
+                                When active, this member will be visible in your public team directory
+                              </p>
+                            </div>
+                            <Switch 
+                              id="member-active"
+                              checked={newTeamMember.isActive}
+                              onCheckedChange={(checked) => setNewTeamMember({...newTeamMember, isActive: checked})}
+                            />
+                          </div>
+
+                          <div className="flex gap-2 pt-4">
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setIsAddTeamMemberOpen(false)}
+                              className="flex-1"
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={handleAddTeamMember}
+                              disabled={!newTeamMember.name.trim() || !newTeamMember.role.trim()}
+                              className="flex-1"
+                            >
+                              Add Member
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <Button className="w-full sm:w-auto">
-                        <User className="w-4 h-4 mr-2" />
-                        Add Team Member
-                      </Button>
-                      <div className="text-center py-8 text-muted-foreground">
-                        No team members added yet. Click "Add Team Member" to get started.
-                      </div>
+                      {teamMembers.length > 0 ? (
+                        <div className="grid gap-4">
+                          {teamMembers.map((member) => (
+                            <div key={member.id} className="border rounded-lg p-4 space-y-3">
+                              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                                <div className="space-y-1 flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-medium text-foreground">{member.name}</h3>
+                                    <Badge variant="outline" className="text-xs">
+                                      {member.role}
+                                    </Badge>
+                                  </div>
+                                  <div className="space-y-1 text-sm text-muted-foreground">
+                                    {member.email && (
+                                      <div className="flex items-center gap-1">
+                                        <Mail className="w-3 h-3" />
+                                        <span>{member.email}</span>
+                                      </div>
+                                    )}
+                                    {member.phone && (
+                                      <div className="flex items-center gap-1">
+                                        <Phone className="w-3 h-3" />
+                                        <span>{member.phone}</span>
+                                      </div>
+                                    )}
+                                    {member.department && (
+                                      <div className="flex items-center gap-1">
+                                        <Building2 className="w-3 h-3" />
+                                        <span>{member.department}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => handleDeleteTeamMember(member.id)}
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-between pt-2 border-t">
+                                <div className="flex items-center gap-2">
+                                  <Eye className={`w-4 h-4 ${member.isActive ? 'text-green-600' : 'text-gray-400'}`} />
+                                  <span className="text-sm font-medium">
+                                    {member.isActive ? 'Visible in Team Directory' : 'Hidden from Team Directory'}
+                                  </span>
+                                </div>
+                                <Switch 
+                                  checked={member.isActive}
+                                  onCheckedChange={(checked) => handleToggleTeamMember(member.id, checked)}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          No team members added yet. Click "Add Team Member" to get started.
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
