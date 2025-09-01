@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -6,20 +7,16 @@ import { Label } from '@/components/ui/label';
 import { X, Plus } from 'lucide-react';
 import type { RegistrationData } from '../RegistrationFlow';
 
-const predefinedServices = [
-  'Software Development',
-  'Digital Marketing',
-  'Cloud Solutions',
-  'Data Analytics',
-  'UI/UX Design',
-  'Mobile Development',
-  'Cybersecurity',
-  'AI & Machine Learning',
-  'DevOps',
-  'Consulting',
-  'Project Management',
-  'Quality Assurance',
-];
+async function fetchServicesInAction(): Promise<string[]> {
+  const paramCode = "SERVICE_EXPERTISES"
+  try {
+    const response = await axios.get(`http://localhost:8082/api/common/systemparameter/${paramCode}`);
+    return Array.isArray(response.data.data) ? response.data.data : [];
+  } catch (error) {
+    console.error("Failed to fetch services:", error);
+    return [];
+  }
+}
 
 interface ExpertiseServicesProps {
   data: RegistrationData;
@@ -34,9 +31,14 @@ export const ExpertiseServices: React.FC<ExpertiseServicesProps> = ({
   onBack,
   showBack,
 }) => {
+  const [availableServices, setAvailableServices] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>(data.services);
   const [customService, setCustomService] = useState(data.customServices);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchServicesInAction().then(setAvailableServices);
+  }, []);
 
   const toggleService = (service: string) => {
     setSelectedServices(prev =>
@@ -49,12 +51,10 @@ export const ExpertiseServices: React.FC<ExpertiseServicesProps> = ({
 
   const addCustomService = () => {
     if (!customService.trim()) return;
-    
     if (selectedServices.includes(customService.trim())) {
       setError('This service is already selected');
       return;
     }
-
     setSelectedServices(prev => [...prev, customService.trim()]);
     setCustomService('');
     setError('');
@@ -83,11 +83,11 @@ export const ExpertiseServices: React.FC<ExpertiseServicesProps> = ({
         </p>
       </div>
 
-      {/* Predefined Services */}
+      {/* API Fetched Services */}
       <div>
         <Label className="text-sm font-medium mb-3 block">Select Services</Label>
         <div className="flex flex-wrap gap-2">
-          {predefinedServices.map(service => (
+          {availableServices.map(service => (
             <Badge
               key={service}
               variant={selectedServices.includes(service) ? 'default' : 'outline'}

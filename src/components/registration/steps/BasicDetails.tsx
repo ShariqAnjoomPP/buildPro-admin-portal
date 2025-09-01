@@ -14,6 +14,8 @@ const schema = z.object({
   companyName: z.string().min(1, 'Company name is required'),
   website: z.string().optional(),
   description: z.string().min(10, 'Please provide at least 10 characters').max(500, 'Description too long'),
+  officialEmail: z.string().email('Please enter a valid email address'),
+  phoneNumber: z.string().min(10, 'Please enter a valid phone number').max(15, 'Phone number too long'),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -23,6 +25,7 @@ interface BasicDetailsProps {
   onNext: (data: Partial<RegistrationData>) => void;
   onBack?: () => void;
   showBack?: boolean;
+  loading?: boolean;
 }
 
 export const BasicDetails: React.FC<BasicDetailsProps> = ({ data, onNext }) => {
@@ -37,6 +40,8 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({ data, onNext }) => {
       companyName: data.companyName,
       website: data.website,
       description: data.description,
+      officialEmail: (data as any).officialEmail || '',
+      phoneNumber: data.phoneNumber || '',
     },
   });
 
@@ -71,6 +76,38 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({ data, onNext }) => {
           />
           {errors.companyName && (
             <p className="text-sm text-destructive mt-1">{errors.companyName.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="officialEmail" className="text-sm font-medium">
+            Official Email *
+          </Label>
+          <Input
+            id="officialEmail"
+            type="email"
+            placeholder="e.g., contact@acme.com"
+            {...register('officialEmail')}
+            className="mt-1"
+          />
+          {errors.officialEmail && (
+            <p className="text-sm text-destructive mt-1">{errors.officialEmail.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="phoneNumber" className="text-sm font-medium">
+            Phone Number *
+          </Label>
+          <Input
+            id="phoneNumber"
+            type="tel"
+            placeholder="e.g., +1234567890"
+            {...register('phoneNumber')}
+            className="mt-1"
+          />
+          {errors.phoneNumber && (
+            <p className="text-sm text-destructive mt-1">{errors.phoneNumber.message}</p>
           )}
         </div>
 

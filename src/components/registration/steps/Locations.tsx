@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -6,20 +7,16 @@ import { Label } from '@/components/ui/label';
 import { X, MapPin, Plus } from 'lucide-react';
 import type { RegistrationData } from '../RegistrationFlow';
 
-const popularLocations = [
-  'United States',
-  'Canada',
-  'United Kingdom',
-  'Germany',
-  'France',
-  'Australia',
-  'India',
-  'Singapore',
-  'Netherlands',
-  'Sweden',
-  'Switzerland',
-  'Japan',
-];
+async function fetchOperationalLocations(): Promise<string[]> {
+  const paramCode = "OPERATIONAL_LOCATIONS"
+  try {
+    const response = await axios.get(`http://localhost:8082/api/common/systemparameter/${paramCode}`);
+    return Array.isArray(response.data.data) ? response.data.data : [];
+  } catch (error) {
+    console.error("Failed to fetch services:", error);
+    return [];
+  }
+}
 
 interface LocationsProps {
   data: RegistrationData;
@@ -34,9 +31,14 @@ export const Locations: React.FC<LocationsProps> = ({
   onBack,
   showBack,
 }) => {
+  const [operationalLocations, setOperationalLocations] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>(data.locations);
   const [customLocation, setCustomLocation] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchOperationalLocations().then(setOperationalLocations);
+  }, []);
 
   const addLocation = (location: string) => {
     const trimmedLocation = location.trim();
@@ -79,7 +81,7 @@ export const Locations: React.FC<LocationsProps> = ({
       <div>
         <Label className="text-sm font-medium mb-3 block">Popular Locations</Label>
         <div className="flex flex-wrap gap-2">
-          {popularLocations.map(location => (
+          {operationalLocations.map(location => (
             <Badge
               key={location}
               variant={selectedLocations.includes(location) ? 'default' : 'outline'}
