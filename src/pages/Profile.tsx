@@ -145,6 +145,7 @@ export default function Profile() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -372,6 +373,77 @@ export default function Profile() {
     }
   };
 
+  const handleUpdateProfile = async () => {
+    setIsUpdating(true);
+    const jwtToken = localStorage.getItem('jwtToken');
+    
+    try {
+      // Prepare the update request payload
+      const updateRequest = {
+        companyName: profileData.companyName,
+        officialPhoneNumber: profileData.phone,
+        officialAddress: profileData.address,
+        companyDescription: profileData.about,
+        services: services.map(service => ({
+          id: service.id === 'new' ? null : parseInt(service.id),
+          title: service.name,
+          description: service.description,
+          expertiseLevel: service.expertise.toUpperCase(),
+          active: service.isActive
+        })),
+        portfolio: works.length > 0 ? {
+          id: works[0].id === 'new' ? null : parseInt(works[0].id),
+          title: works[0].title,
+          description: works[0].description,
+          category: works[0].category,
+          location: works[0].location,
+          projectCost: works[0].cost,
+          projectDate: works[0].deadline ? new Date(works[0].deadline) : null,
+          projectMedias: [...works[0].images, ...works[0].videos]
+        } : null,
+        templateActivation: {
+          templateId: activeTemplate
+        },
+        teamMembers: teamMembers.map(member => ({
+          id: member.id === 'new' ? null : parseInt(member.id),
+          name: member.name,
+          role: member.role,
+          profileImageUrl: null
+        })),
+        isFromRegistration: false
+      };
+
+      const response = await axios.put(
+        "http://localhost:6090/api/profile/68b358472faa9550147051af",
+        updateRequest,
+        {
+          headers: {
+            Authorization: jwtToken ? `Bearer ${jwtToken}` : undefined,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+
+      if (response.data.success) {
+        toast({
+          title: "Profile Updated",
+          description: "Your profile has been successfully updated."
+        });
+      } else {
+        throw new Error(response.data.message || "Failed to update profile");
+      }
+    } catch (err: any) {
+      console.error("Update error:", err);
+      toast({
+        title: "Update Failed",
+        description: err.response?.data?.message || "Failed to update profile. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -403,8 +475,12 @@ export default function Profile() {
                   Manage your business profile and information
                 </p>
               </div>
-              <Button className="w-full sm:w-auto">
-                Save Changes
+              <Button 
+                className="w-full sm:w-auto"
+                onClick={handleUpdateProfile}
+                disabled={isUpdating}
+              >
+                {isUpdating ? "Updating..." : "Save Changes"}
               </Button>
             </div>
           </header>
