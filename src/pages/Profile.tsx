@@ -72,7 +72,7 @@ interface ApiServiceDetail {
   title: string;
   description: string;
   expertiseLevel: "BEGINNER" | "INTERMEDIATE" | "EXPERT";
-  active: string;
+  active: string | boolean;
 }
 
 interface ApiService {
@@ -192,7 +192,7 @@ export default function Profile() {
               description: detail.description,
               expertise:
                 detail.expertiseLevel?.toLowerCase() as "beginner" | "intermediate" | "expert",
-              isActive: detail.active === "true",
+              isActive: detail.active === true || detail.active === "true",
             });
           });
         });
