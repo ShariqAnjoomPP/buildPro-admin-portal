@@ -146,6 +146,24 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [availableServices, setAvailableServices] = useState<string[]>([]);
+
+  // Fetch available services from API
+  const fetchAvailableServices = async (): Promise<string[]> => {
+    const paramCode = "SERVICE_EXPERTISES";
+    try {
+      const response = await axios.get(`http://localhost:8082/api/common/systemparameter/${paramCode}`);
+      return Array.isArray(response.data.data) ? response.data.data : [];
+    } catch (error) {
+      console.error("Failed to fetch services:", error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    // Fetch available services
+    fetchAvailableServices().then(setAvailableServices);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -573,12 +591,18 @@ export default function Profile() {
                         <div className="space-y-4">
                           <div className="space-y-2">
                             <Label htmlFor="service-name">Service Name</Label>
-                            <Input 
-                              id="service-name"
-                              placeholder="e.g., Web Development, Photography"
-                              value={newService.name}
-                              onChange={(e) => setNewService({...newService, name: e.target.value})}
-                            />
+                            <Select value={newService.name} onValueChange={(value) => setNewService({...newService, name: value})}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a service" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableServices.map(service => (
+                                  <SelectItem key={service} value={service}>
+                                    {service}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                           
                           <div className="space-y-2">
@@ -630,7 +654,7 @@ export default function Profile() {
                             </Button>
                             <Button 
                               onClick={handleAddService}
-                              disabled={!newService.name.trim()}
+                              disabled={!newService.name}
                               className="flex-1"
                             >
                               Add Service
