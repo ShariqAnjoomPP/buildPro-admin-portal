@@ -409,16 +409,16 @@ export default function Profile() {
           expertiseLevel: service.expertise.toUpperCase(),
           active: service.isActive
         })),
-        portfolio: works.length > 0 ? {
-          id: works[0].id === 'new' ? null : parseInt(works[0].id),
-          title: works[0].title,
-          description: works[0].description,
-          category: works[0].category,
-          location: works[0].location,
-          projectCost: works[0].cost,
-          projectDate: works[0].deadline ? new Date(works[0].deadline) : null,
-          projectMedias: [...works[0].images, ...works[0].videos]
-        } : null,
+        portfolio: works.length > 0 ? works.map(work => ({
+          id: work.id === 'new' ? null : parseInt(work.id),
+          title: work.title,
+          description: work.description,
+          category: work.category,
+          location: work.location,
+          projectCost: work.cost,
+          projectDate: work.deadline ? new Date(work.deadline) : null,
+          projectMedias: [...work.images, ...work.videos]
+        })) : null,
         templateActivation: {
           templateId: activeTemplate
         },
