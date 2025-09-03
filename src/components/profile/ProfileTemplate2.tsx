@@ -26,100 +26,170 @@ interface ProfileTemplate2Props {
 
 export function ProfileTemplate2({ data }: ProfileTemplate2Props) {
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-6">
-        {/* Sidebar */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card className="border-2 border-primary/20">
-            <CardContent className="p-6 text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-secondary to-secondary/60 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <Building2 className="w-10 h-10 text-secondary-foreground" />
-              </div>
-              <h1 className="text-xl font-bold text-foreground mb-2">{data.companyName || "Your Company"}</h1>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                {data.phone && (
-                  <div className="flex items-center justify-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    <span>{data.phone}</span>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+          {/* Enhanced Sidebar */}
+          <div className="xl:col-span-1 space-y-6">
+            {/* Company Card */}
+            <Card className="border-2 border-primary/20 shadow-elevated bg-gradient-subtle sticky top-8">
+              <CardContent className="p-8 text-center space-y-6">
+                <div className="relative">
+                  <div className="w-24 h-24 bg-gradient-secondary rounded-2xl mx-auto flex items-center justify-center shadow-card">
+                    <Building2 className="w-12 h-12 text-secondary-foreground" />
                   </div>
-                )}
-                {data.address && (
-                  <div className="flex items-center justify-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    <span className="text-center">{data.address}</span>
+                  <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-success rounded-full border-2 border-background"></div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h1 className="text-2xl font-heading font-bold text-foreground">
+                    {data.companyName || "Your Company"}
+                  </h1>
+                  
+                  <div className="space-y-3">
+                    {data.phone && (
+                      <div className="flex items-center justify-center gap-3 p-3 bg-primary/5 rounded-lg">
+                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Phone className="w-4 h-4 text-primary" />
+                        </div>
+                        <span className="text-sm font-body font-medium text-foreground">{data.phone}</span>
+                      </div>
+                    )}
+                    {data.address && (
+                      <div className="flex items-center justify-center gap-3 p-3 bg-secondary/5 rounded-lg">
+                        <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center">
+                          <MapPin className="w-4 h-4 text-secondary" />
+                        </div>
+                        <span className="text-sm font-body font-medium text-foreground text-center">{data.address}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {data.about && (
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-lg font-semibold mb-3 text-foreground">About</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">{data.about}</p>
+                </div>
               </CardContent>
             </Card>
-          )}
-        </div>
 
-        {/* Main Content */}
-        <div className="lg:col-span-2">
-          {data.works.length > 0 ? (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <Camera className="w-6 h-6" />
-                Portfolio
-              </h2>
-              <div className="space-y-6">
-                {data.works.map((work) => (
-                  <Card key={work.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
-                      <div className="aspect-video md:aspect-square bg-muted relative">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Camera className="w-8 h-8 text-muted-foreground" />
-                        </div>
-                      </div>
-                      <div className="md:col-span-2 p-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <h3 className="text-lg font-semibold text-foreground">{work.title}</h3>
+            {/* About Card */}
+            {data.about && (
+              <Card className="shadow-card bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-6 space-y-4">
+                  <h2 className="text-xl font-heading font-semibold text-foreground flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-primary" />
+                    About Us
+                  </h2>
+                  <p className="text-sm font-body text-muted-foreground leading-relaxed">{data.about}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Stats Card */}
+            <Card className="shadow-card bg-gradient-primary text-primary-foreground">
+              <CardContent className="p-6 space-y-4">
+                <h3 className="font-heading font-semibold">Portfolio Stats</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{data.works.length}</div>
+                    <div className="text-xs opacity-80">Projects</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">5+</div>
+                    <div className="text-xs opacity-80">Years</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Enhanced Main Content */}
+          <div className="xl:col-span-3">
+            {data.works.length > 0 ? (
+              <div className="space-y-8">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-3xl font-heading font-bold text-foreground flex items-center gap-3">
+                    <Camera className="w-8 h-8 text-primary" />
+                    Portfolio
+                  </h2>
+                  <Badge variant="outline" className="px-4 py-2">
+                    {data.works.length} Projects
+                  </Badge>
+                </div>
+                
+                <div className="space-y-8">
+                  {data.works.map((work, index) => (
+                    <Card key={work.id} className="group overflow-hidden shadow-card hover:shadow-dramatic transition-all duration-500 bg-card/80 backdrop-blur-sm">
+                      <div className={`grid gap-0 ${index % 2 === 0 ? 'grid-cols-1 lg:grid-cols-5' : 'grid-cols-1 lg:grid-cols-5'}`}>
+                        <div className={`aspect-video lg:aspect-[4/3] bg-gradient-to-br from-muted to-muted/50 relative overflow-hidden ${index % 2 === 0 ? 'lg:col-span-2' : 'lg:col-span-2 lg:order-2'}`}>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Camera className="w-12 h-12 text-muted-foreground group-hover:scale-110 transition-transform duration-500" />
+                          </div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                           {work.category && (
-                            <Badge variant="outline">{work.category}</Badge>
+                            <Badge className="absolute top-4 right-4 bg-primary/90 text-primary-foreground shadow-card">
+                              {work.category}
+                            </Badge>
                           )}
                         </div>
-                        <p className="text-muted-foreground mb-4 leading-relaxed">{work.description}</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                          {work.location && (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <MapPin className="w-4 h-4 text-primary" />
-                              <span>{work.location}</span>
-                            </div>
-                          )}
-                          {work.cost && (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <DollarSign className="w-4 h-4 text-primary" />
-                              <span>{work.cost}</span>
-                            </div>
-                          )}
-                          {work.deadline && (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Calendar className="w-4 h-4 text-primary" />
-                              <span>{new Date(work.deadline).toLocaleDateString()}</span>
-                            </div>
-                          )}
+                        
+                        <div className={`p-8 space-y-6 ${index % 2 === 0 ? 'lg:col-span-3' : 'lg:col-span-3 lg:order-1'}`}>
+                          <div className="space-y-3">
+                            <h3 className="text-2xl font-heading font-semibold text-foreground group-hover:text-primary transition-colors">
+                              {work.title}
+                            </h3>
+                            <p className="text-muted-foreground font-body leading-relaxed">{work.description}</p>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {work.location && (
+                              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                  <MapPin className="w-5 h-5 text-primary" />
+                                </div>
+                                <div>
+                                  <div className="text-xs text-muted-foreground">Location</div>
+                                  <div className="text-sm font-medium text-foreground">{work.location}</div>
+                                </div>
+                              </div>
+                            )}
+                            {work.cost && (
+                              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                                <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center">
+                                  <DollarSign className="w-5 h-5 text-secondary" />
+                                </div>
+                                <div>
+                                  <div className="text-xs text-muted-foreground">Cost</div>
+                                  <div className="text-sm font-medium text-foreground">{work.cost}</div>
+                                </div>
+                              </div>
+                            )}
+                            {work.deadline && (
+                              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                                <div className="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center">
+                                  <Calendar className="w-5 h-5 text-warning" />
+                                </div>
+                                <div>
+                                  <div className="text-xs text-muted-foreground">Deadline</div>
+                                  <div className="text-sm font-medium text-foreground">{new Date(work.deadline).toLocaleDateString()}</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <Camera className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">No portfolio items to display</p>
-            </div>
-          )}
+            ) : (
+              <div className="text-center py-24 space-y-6">
+                <div className="w-24 h-24 bg-muted/20 rounded-full mx-auto flex items-center justify-center">
+                  <Camera className="w-12 h-12 text-muted-foreground" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-heading font-semibold text-foreground">No Portfolio Items</h3>
+                  <p className="text-muted-foreground font-body">Showcase your work to attract more clients</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
