@@ -10,7 +10,7 @@ import type { RegistrationData } from '../RegistrationFlow';
 async function fetchServicesInAction(): Promise<string[]> {
   const paramCode = "SERVICE_EXPERTISES"
   try {
-    const response = await axios.get(`http://localhost:8082/api/common/systemparameter/${paramCode}`);
+    const response = await axios.get(`http://localhost:6090/api/common/systemparameter/${paramCode}`);
     return Array.isArray(response.data.data) ? response.data.data : [];
   } catch (error) {
     console.error("Failed to fetch services:", error);

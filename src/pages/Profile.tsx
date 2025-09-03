@@ -162,7 +162,11 @@ export default function Profile() {
 
   useEffect(() => {
     // Fetch available services
-    fetchAvailableServices().then(setAvailableServices);
+    const code = "SERVICE_EXPERTISES"
+    const response = axios.get(`http://localhost:6090/api/common/systemparameter/${code}`, {
+      }).then((res) => {
+        setAvailableServices(Array.isArray(res.data.data) ? res.data.data : []);
+      })
   }, []);
 
   useEffect(() => {
