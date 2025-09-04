@@ -16,6 +16,11 @@ import { useState, useEffect } from "react";
 import { ProfileTemplate1 } from "@/components/profile/ProfileTemplate1";
 import { ProfileTemplate2 } from "@/components/profile/ProfileTemplate2";
 import { ProfileTemplate3 } from "@/components/profile/ProfileTemplate3";
+import { ProfileTemplate4 } from "@/components/profile/ProfileTemplate4";
+import { ProfileTemplate5 } from "@/components/profile/ProfileTemplate5";
+import { ProfileTemplate6 } from "@/components/profile/ProfileTemplate6";
+import { ProfileTemplate7 } from "@/components/profile/ProfileTemplate7";
+import { ProfileTemplate8 } from "@/components/profile/ProfileTemplate8";
 
 interface Work {
   id: string;
@@ -378,7 +383,12 @@ export default function Profile() {
   };
 
   const getTemplateComponent = (templateNumber: number) => {
-    const data = { ...profileData, works };
+    const data = { 
+      ...profileData, 
+      works,
+      services,
+      teamMembers
+    };
     switch (templateNumber) {
       case 1:
         return <ProfileTemplate1 data={data} />;
@@ -386,6 +396,16 @@ export default function Profile() {
         return <ProfileTemplate2 data={data} />;
       case 3:
         return <ProfileTemplate3 data={data} />;
+      case 4:
+        return <ProfileTemplate4 data={data} />;
+      case 5:
+        return <ProfileTemplate5 data={data} />;
+      case 6:
+        return <ProfileTemplate6 data={data} />;
+      case 7:
+        return <ProfileTemplate7 data={data} />;
+      case 8:
+        return <ProfileTemplate8 data={data} />;
       default:
         return <ProfileTemplate1 data={data} />;
     }
@@ -840,19 +860,14 @@ export default function Profile() {
                                 <Camera className="w-8 h-8 text-muted-foreground" />
                               </div>
                               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <div className="flex gap-1">
-                                  <Button size="icon" variant="secondary" className="h-8 w-8">
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                  <Button 
-                                    size="icon" 
-                                    variant="destructive" 
-                                    className="h-8 w-8"
-                                    onClick={() => handleDeleteWork(work.id)}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  className="h-8 w-8"
+                                  onClick={() => handleDeleteWork(work.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
                               </div>
                             </div>
                             <CardContent className="p-4">
@@ -905,49 +920,65 @@ export default function Profile() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {[1, 2, 3].map((templateNumber) => (
-                        <Card key={templateNumber} className={`relative overflow-hidden transition-all ${
-                          activeTemplate === templateNumber ? 'ring-2 ring-primary' : 'hover:shadow-lg'
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {[
+                        { number: 1, name: "Classic", description: "Traditional business layout with portfolio grid" },
+                        { number: 2, name: "Modern", description: "Contemporary design with cards and animations" },
+                        { number: 3, name: "Premium", description: "Sophisticated layout with enhanced visual hierarchy" },
+                        { number: 4, name: "Masonry", description: "Dynamic masonry grid layout for portfolios" },
+                        { number: 5, name: "Bento", description: "Modern bento-style component layout" },
+                        { number: 6, name: "Minimal", description: "Clean, minimalist design approach" },
+                        { number: 7, name: "Split", description: "Split-screen layout with sidebar navigation" },
+                        { number: 8, name: "Timeline", description: "Timeline-based portfolio presentation" }
+                      ].map((template) => (
+                        <Card key={template.number} className={`relative overflow-hidden transition-all ${
+                          activeTemplate === template.number ? 'ring-2 ring-primary shadow-lg' : 'hover:shadow-lg'
                         }`}>
                           <div className="aspect-video bg-gradient-to-br from-muted to-muted/50 relative group cursor-pointer"
-                               onClick={() => handlePreviewTemplate(templateNumber)}>
+                               onClick={() => handlePreviewTemplate(template.number)}>
                             <div className="absolute inset-0 flex items-center justify-center">
                               <div className="text-center">
                                 <Eye className="w-8 h-8 mx-auto mb-2 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
-                                  Template {templateNumber}
+                                <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors font-medium">
+                                  {template.name}
                                 </p>
                               </div>
                             </div>
-                            {activeTemplate === templateNumber && (
+                            {activeTemplate === template.number && (
                               <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
                                 <Check className="w-4 h-4" />
                               </div>
                             )}
                           </div>
                           <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h3 className="font-semibold text-sm">
-                                  {templateNumber === 1 ? 'Classic' : templateNumber === 2 ? 'Modern' : 'Premium'} Template
-                                </h3>
-                                <p className="text-xs text-muted-foreground">
-                                  {templateNumber === 1 ? 'Clean and professional' : 
-                                   templateNumber === 2 ? 'Sidebar layout design' : 
-                                   'Hero section with gradient'}
-                                </p>
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <h3 className="font-semibold text-foreground">{template.name}</h3>
+                                <Badge variant={activeTemplate === template.number ? "default" : "outline"} className="text-xs">
+                                  Template {template.number}
+                                </Badge>
                               </div>
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="outline" onClick={() => handlePreviewTemplate(templateNumber)}>
-                                  <Eye className="w-3 h-3" />
+                              <p className="text-xs text-muted-foreground">{template.description}</p>
+                            </div>
+                            <div className="flex gap-2 mt-4">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => handlePreviewTemplate(template.number)}
+                                className="flex-1"
+                              >
+                                <Eye className="w-3 h-3 mr-1" />
+                                Preview
+                              </Button>
+                              {activeTemplate !== template.number && (
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleActivateTemplate(template.number)}
+                                  className="flex-1"
+                                >
+                                  Activate
                                 </Button>
-                                {activeTemplate !== templateNumber && (
-                                  <Button size="sm" onClick={() => handleActivateTemplate(templateNumber)}>
-                                    Activate
-                                  </Button>
-                                )}
-                              </div>
+                              )}
                             </div>
                           </CardContent>
                         </Card>
@@ -958,7 +989,16 @@ export default function Profile() {
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-2 h-2 bg-primary rounded-full"></div>
                         <span className="font-medium text-sm">Currently Active: 
-                          {activeTemplate === 1 ? ' Classic' : activeTemplate === 2 ? ' Modern' : ' Premium'} Template
+                          {
+                            activeTemplate === 1 ? ' Classic' : 
+                            activeTemplate === 2 ? ' Modern' : 
+                            activeTemplate === 3 ? ' Premium' :
+                            activeTemplate === 4 ? ' Masonry' :
+                            activeTemplate === 5 ? ' Bento' :
+                            activeTemplate === 6 ? ' Minimal' :
+                            activeTemplate === 7 ? ' Split' :
+                            activeTemplate === 8 ? ' Timeline' : ' Classic'
+                          } Template
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground">
@@ -1134,7 +1174,7 @@ export default function Profile() {
                                 <div className="flex items-center gap-2">
                                   <Eye className={`w-4 h-4 ${member.isActive ? 'text-green-600' : 'text-gray-400'}`} />
                                   <span className="text-sm font-medium">
-                                    {member.isActive ? 'Visible to Public' : 'Hidden from Public'}
+                                    {member.isActive ? 'Visible in Team Directory' : 'Hidden from Public'}
                                   </span>
                                 </div>
                                 <Switch 
@@ -1165,7 +1205,16 @@ export default function Profile() {
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between p-4 border-b">
               <DialogTitle>
-                {previewTemplate === 1 ? 'Classic' : previewTemplate === 2 ? 'Modern' : 'Premium'} Template Preview
+                {
+                  previewTemplate === 1 ? 'Classic' : 
+                  previewTemplate === 2 ? 'Modern' : 
+                  previewTemplate === 3 ? 'Premium' :
+                  previewTemplate === 4 ? 'Masonry' :
+                  previewTemplate === 5 ? 'Bento' :
+                  previewTemplate === 6 ? 'Minimal' :
+                  previewTemplate === 7 ? 'Split' :
+                  previewTemplate === 8 ? 'Timeline' : 'Classic'
+                } Template Preview
               </DialogTitle>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setIsTemplatePreviewOpen(false)}>
